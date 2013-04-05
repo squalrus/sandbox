@@ -5,7 +5,7 @@ var  express = require( 'express' )
 
 function start( route ){
 
-    app.listen( 1337, 'pallas.it.corp' );
+    app.listen( 1337, 'localhost' );
 
     // Middleware
     app.use( express.bodyParser() );
