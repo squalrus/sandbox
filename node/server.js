@@ -23,7 +23,7 @@ if( cluster.isMaster ){
     // Middleware
     app.use( express.bodyParser() );
     app.use( express.cookieParser() );
-    // app.use( express.session({ secret: 'internet'}) );
+    app.use( express.session({ secret: 'internet'}) );
     app.use( express.compress() );
     app.use( express.static( __dirname + '/public', { maxAge: 86400000 }) );
 

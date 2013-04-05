@@ -2,6 +2,7 @@
      "name": "clustering"
     ,"version": "0.1.0"
     ,"dependencies": {
-        "express": "3.0.x"
+         "express": "3.0.6"
+        ,"socket.io": "0.9.14"
     }
 }
