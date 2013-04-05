@@ -25,6 +25,8 @@ function start( route ){
         app.use( express.bodyParser() );
         app.use( express.cookieParser() );
         app.use( express.session({ secret: 'internet'}) );
+        app.use( express.compress() );
+        app.use( express.static( __dirname + '/public', { maxAge: 86400000 }) );
 
         // Application level settings
         app.set( 'view engine', 'ejs' );
@@ -37,33 +39,39 @@ function start( route ){
         // Routing
         app.get( '/', function( req, res ){
 
-            res.writeHead( 200, {'Content-Type': 'text/plain'} );
+            res.render( 'index' );
 
-            res.write( 'Request\n' );
-            res.write( '----------------------------------------\n' );
-            res.write( 'Request: ' + req + '\n' );
+            // res.writeHead( 200, {'Content-Type': 'text/plain'} );
 
-            res.write( '\n' );
+            // res.write( 'Request\n' );
+            // res.write( '----------------------------------------\n' );
+            // res.write( 'Request: ' + req + '\n' );
 
-            res.write( 'CPU Stuff!\n' );
-            res.write( '----------------------------------------\n' );
-            res.write( 'Hostname: ' + os.hostname() + '\n' );
-            res.write( 'OS Name: ' + os.type() + '\n' );
-            res.write( 'OS Platform: ' + os.platform() + '\n' );
-            res.write( 'OS Release: ' + os.release() + '\n' );
-            res.write( 'CPU Arch: ' + os.arch() + '\n' );
-            res.write( 'CPUS: ' + os.cpus().length + '\n' );
-            res.write( 'Uptime: ' + os.uptime() + '\n' );
+            // res.write( '\n' );
 
-            res.write( '\n' );
+            // res.write( 'CPU Stuff!\n' );
+            // res.write( '----------------------------------------\n' );
+            // res.write( 'Hostname: ' + os.hostname() + '\n' );
+            // res.write( 'OS Name: ' + os.type() + '\n' );
+            // res.write( 'OS Platform: ' + os.platform() + '\n' );
+            // res.write( 'OS Release: ' + os.release() + '\n' );
+            // res.write( 'CPU Arch: ' + os.arch() + '\n' );
+            // res.write( 'CPUS: ' + os.cpus().length + '\n' );
+            // res.write( 'Uptime: ' + os.uptime() + '\n' );
 
-            res.write( 'Workers \'n Junk\n' );
-            res.write( '----------------------------------------\n' );
-            res.write( 'Workers: ' + cluster.length ) + '\n';
-            res.write( 'Worker: #' + cluster.worker.id );
+            // res.write( '\n' );
 
-            res.end();
+            // res.write( 'Workers \'n Junk\n' );
+            // res.write( '----------------------------------------\n' );
+            // res.write( 'Workers: ' + cluster.length ) + '\n';
+            // res.write( 'Worker: #' + cluster.worker.id );
+
+            // res.end();
         });
+
+        // app.get( '/js/*', function( req, res ){
+
+        // });
 
         // Routing - POST
         app.post( '/', function( req, res ){
