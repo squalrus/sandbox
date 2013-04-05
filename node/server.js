@@ -1,9 +1,14 @@
-var  express = require( 'express' )
-    ,app     = express()
-    ,server  = require( 'http' ).createServer( app )
-    ,io      = require( 'socket.io' ).listen( server )
-    ,cluster = require( 'cluster' )
-    ,os      = require( 'os' );
+var  express    = require( 'express' )
+    ,app        = express()
+    ,http       = require( 'http' ) //.createServer( app )
+    ,io         = require( 'socket.io' ) //.listen( server )
+    ,cluster    = require( 'cluster' )
+    ,os         = require( 'os' )
+    ,redis      = require( 'redis' )
+    ,RedisStore = require( 'socket.io/lib/stores/redis' )
+    ,pub        = redis.createClient()
+    ,sub        = redis.createClient()
+    ,client     = redis.createClient();
 
 // Multithreading
 if( cluster.isMaster ){
@@ -17,8 +22,14 @@ if( cluster.isMaster ){
         console.log( 'Worker #' + worker.process.pid + ' died. *sadface*');
         cluster.fork();
     });
+
 }else{
-    server.listen( 1337 );
+
+    var a = express();
+    var s = http.createServer( app );
+    var sio = io.listen( s );
+
+    s.listen( 1337 );
 
     // Middleware
     app.use( express.bodyParser() );
@@ -38,7 +49,9 @@ if( cluster.isMaster ){
     // Routing
     app.get( '/', function( req, res ){
 
-        res.render( 'index' );
+        res.render( 'index', {
+            worker: cluster.worker.id
+        });
 
         // res.writeHead( 200, {'Content-Type': 'text/plain'} );
 
@@ -74,22 +87,34 @@ if( cluster.isMaster ){
     });
 
     // Socket stuff
+    // io.set( 'transports', 'websocket' );
+    sio.set( 'store', new RedisStore({
+         redisPub    : pub
+        ,redisSub    : sub
+        ,redisClient : client
+    }));
+
     // Add a connect listener
-    io.sockets.on( 'connection', function( socket ){
+    sio.sockets.on( 'connection', function( socket ){
+
+        socket.emit( 'welcome', { msg: 'oh hai!' });
 
         // Success, listen to messages to be recieved
         socket.on( 'message', function( event ){
             console.log( 'Recieved message from client!', event );
         });
 
+        socket.on( 'error', function( message ){
+            console.log( 'Error: ' + message );
+        })
+
         socket.on( 'disconnect', function(){
-            clearInterval( interval );
             console.log( 'Server has disconnected' );
         });
 
         // Send a message every once and a while
-        var interval = setInterval( function(){
-            socket.send( 'Hello! - the server @ ' + new Date().getTime() );
+        setInterval( function(){
+            socket.send( 'Hello! - Worker #' + cluster.worker.id + ' @ ' + new Date().getTime() );
         }, 5000 );
     });
 
