@@ -1,67 +1,86 @@
 var  express = require( 'express' )
     ,app     = express()
     ,io      = require( 'socket.io' ).listen( app )
+    ,cluster = require( 'cluster' )
     ,os      = require( 'os' );
 
 function start( route ){
 
-    app.listen( 1337, 'localhost' );
+    // Multithreading
+    if( cluster.isMaster ){
 
-    // Middleware
-    app.use( express.bodyParser() );
-    app.use( express.cookieParser() );
-    app.use( express.session({ secret: 'internet'}) );
+        // Fork workers
+        for( var i=0; i<os.cpus().length; i++ ){
+            cluster.fork();
+        }
 
-    // Application level settings
-    app.set( 'view engine', 'ejs' );
+        cluster.on( 'exit', function( worker ){
+            console.log( 'Worker #' + worker.process.pid + ' died. *sadface*');
+            cluster.fork();
+        });
+    }else{
+        app.listen( 1337 );
 
-    // Routing
-    app.get( '/form', function( req, res ){
-        res.render( 'form.ejs' );
-    });
+        // Middleware
+        app.use( express.bodyParser() );
+        app.use( express.cookieParser() );
+        app.use( express.session({ secret: 'internet'}) );
 
-    app.get( '/', function( req, res ){
+        // Application level settings
+        app.set( 'view engine', 'ejs' );
 
-        res.writeHead( 200, {'Content-Type': 'text/plain'} );
+        // Routing - w/ template
+        app.get( '/form', function( req, res ){
+            res.render( 'form.ejs' );
+        });
 
-        res.write( 'Request\n' );
-        res.write( '----------------------------------------\n' );
-        res.write( 'Request: ' + req + '\n' );
+        // Routing
+        app.get( '/', function( req, res ){
 
-        res.write( '\n' );
+            res.writeHead( 200, {'Content-Type': 'text/plain'} );
 
-        res.write( 'CPU Stuff!\n' );
-        res.write( '----------------------------------------\n' );
-        res.write( 'Hostname: ' + os.hostname() + '\n' );
-        res.write( 'OS Name: ' + os.type() + '\n' );
-        res.write( 'OS Platform: ' + os.platform() + '\n' );
-        res.write( 'OS Release: ' + os.release() + '\n' );
-        res.write( 'CPU Arch: ' + os.arch() + '\n' );
-        res.write( 'CPUS: ' + os.cpus().length + '\n' );
-        res.write( 'Uptime: ' + os.uptime() + '\n' );
+            res.write( 'Request\n' );
+            res.write( '----------------------------------------\n' );
+            res.write( 'Request: ' + req + '\n' );
 
-        res.write( '\n' );
+            res.write( '\n' );
 
-        res.write( 'Workers \'n Junk\n' );
-        res.write( '----------------------------------------\n' );
-        res.write( 'Workers: ' + 0 );
+            res.write( 'CPU Stuff!\n' );
+            res.write( '----------------------------------------\n' );
+            res.write( 'Hostname: ' + os.hostname() + '\n' );
+            res.write( 'OS Name: ' + os.type() + '\n' );
+            res.write( 'OS Platform: ' + os.platform() + '\n' );
+            res.write( 'OS Release: ' + os.release() + '\n' );
+            res.write( 'CPU Arch: ' + os.arch() + '\n' );
+            res.write( 'CPUS: ' + os.cpus().length + '\n' );
+            res.write( 'Uptime: ' + os.uptime() + '\n' );
 
-        res.end();
-    });
+            res.write( '\n' );
 
-    app.post( '/', function( req, res ){
-        res.send( req.body );
-    });
+            res.write( 'Workers \'n Junk\n' );
+            res.write( '----------------------------------------\n' );
+            res.write( 'Workers: ' + cluster.length ) + '\n';
+            res.write( 'Worker: #' + cluster.worker.id );
+
+            res.end();
+        });
+
+        // Routing - POST
+        app.post( '/', function( req, res ){
+            res.send( req.body );
+        });
+
+        console.log( 'Server running! Courtesy of Worker #' + cluster.worker.id );
+    }
 
     // Socket stuff
-    io.sockets.on( 'connection', function( socket ){
-        socket.emit( 'news', { hello: 'world' });
-        socket.on( 'my other event', function( data ){
-            console.log( data );
-        });
-    });
+    // io.sockets.on( 'connection', function( socket ){
+    //     socket.emit( 'news', { hello: 'world' });
+    //     socket.on( 'my other event', function( data ){
+    //         console.log( data );
+    //     });
+    // });
 
-    console.log( 'Server running at http://127.0.0.1:1337/' );
 }
 
 exports.start = start;
