@@ -1,6 +1,7 @@
 var  express = require( 'express' )
     ,app     = express()
-    ,io      = require( 'socket.io' ).listen( app )
+    ,server  = require( 'http' ).createServer( app )
+    ,io      = require( 'socket.io' ).listen( server )
     ,cluster = require( 'cluster' )
     ,os      = require( 'os' );
 
@@ -19,12 +20,12 @@ function start( route ){
             cluster.fork();
         });
     }else{
-        app.listen( 1337 );
+        server.listen( 1337 );
 
         // Middleware
         app.use( express.bodyParser() );
         app.use( express.cookieParser() );
-        app.use( express.session({ secret: 'internet'}) );
+        // app.use( express.session({ secret: 'internet'}) );
         app.use( express.compress() );
         app.use( express.static( __dirname + '/public', { maxAge: 86400000 }) );
 
@@ -69,25 +70,33 @@ function start( route ){
             // res.end();
         });
 
-        // app.get( '/js/*', function( req, res ){
-
-        // });
-
         // Routing - POST
         app.post( '/', function( req, res ){
             res.send( req.body );
         });
 
+        // Socket stuff
+        // Add a connect listener
+        io.sockets.on( 'connection', function( socket ){
+
+            // Success, listen to messages to be recieved
+            socket.on( 'message', function( event ){
+                console.log( 'Recieved message from client!', event );
+            });
+
+            socket.on( 'disconnect', function(){
+                clearInterval( interval );
+                console.log( 'Server has disconnected' );
+            });
+
+            // Send a message every once and a while
+            var interval = setInterval( function(){
+                socket.send( 'Hello! - the server @ ' + new Date().getTime() );
+            }, 5000 );
+        });
+
         console.log( 'Server running! Courtesy of Worker #' + cluster.worker.id );
     }
-
-    // Socket stuff
-    // io.sockets.on( 'connection', function( socket ){
-    //     socket.emit( 'news', { hello: 'world' });
-    //     socket.on( 'my other event', function( data ){
-    //         console.log( data );
-    //     });
-    // });
 
 }
 
