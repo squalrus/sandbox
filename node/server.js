@@ -18,9 +18,25 @@ if( cluster.isMaster ){
         cluster.fork();
     }
 
+    var workerIds = Object.keys( cluster.workers );
+
+    workerIds.forEach( function( id ){
+        cluster.workers[ id ].on( 'message', function( message ){
+            console.log( 'Master recieved message from Worker #' + id );
+            var muleWorkerId = workerIds[ Math.floor( Math.random() * workerIds.length ) ];
+            var muleWorker = cluster.workers[ muleWorkerId ];
+            console.log( 'Sending to Worker #' + muleWorkerId );
+            muleWorker.send( message );
+        });
+    });
+
     cluster.on( 'exit', function( worker ){
-        console.log( 'Worker #' + worker.process.pid + ' died. *sadface*');
+        console.log( 'Worker #' + worker.process.pid + ' died.');
         cluster.fork();
+    });
+
+    cluster.on( 'listening', function( worker, address ){
+        console.log( 'A worker is now connected to ' + address.address + ':' + address.port );
     });
 
 }else{
@@ -100,8 +116,14 @@ if( cluster.isMaster ){
         socket.emit( 'welcome', { msg: 'oh hai!' });
 
         // Success, listen to messages to be recieved
-        socket.on( 'message', function( event ){
-            console.log( 'Recieved message from client!', event );
+        socket.on( 'message', function( message ){
+            console.log( 'Worker recieved message from client: ', message );
+            process.send( message );
+        });
+
+        // Listening to Master
+        process.on( 'message', function( message ){
+            socket.send( 'Message recieved and dispatched via Worker #' + cluster.worker.id );
         });
 
         socket.on( 'error', function( message ){
