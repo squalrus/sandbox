@@ -1,14 +1,17 @@
 var  express    = require( 'express' )
     ,app        = express()
-    ,http       = require( 'http' ) //.createServer( app )
-    ,io         = require( 'socket.io' ) //.listen( server )
+    ,http       = require( 'http' )
+    ,io         = require( 'socket.io' )
     ,cluster    = require( 'cluster' )
     ,os         = require( 'os' )
-    ,redis      = require( 'redis' )
-    ,RedisStore = require( 'socket.io/lib/stores/redis' )
-    ,pub        = redis.createClient()
-    ,sub        = redis.createClient()
-    ,client     = redis.createClient();
+    ,MongoStore = require( 'socket.io-mongo' )
+    // ,MongoStore = require( 'mong.socket.io' )
+    // ,redis      = require( 'redis' )
+    // ,RedisStore = require( 'socket.io/lib/stores/redis' )
+    // ,pub        = redis.createClient()
+    // ,sub        = redis.createClient()
+    // ,client     = redis.createClient()
+    ;
 
 // Multithreading
 if( cluster.isMaster ){
@@ -104,11 +107,15 @@ if( cluster.isMaster ){
 
     // Socket stuff
     // io.set( 'transports', 'websocket' );
-    sio.set( 'store', new RedisStore({
-         redisPub    : pub
-        ,redisSub    : sub
-        ,redisClient : client
-    }));
+    // REDIS STORE
+    // sio.set( 'store', new RedisStore({
+    //      redisPub    : pub
+    //     ,redisSub    : sub
+    //     ,redisClient : client
+    // }));
+
+    // MONGO STORE
+    sio.set( 'store', new MongoStore() );
 
     // Add a connect listener
     sio.sockets.on( 'connection', function( socket ){
@@ -136,7 +143,11 @@ if( cluster.isMaster ){
 
         // Send a message every once and a while
         setInterval( function(){
-            socket.send( 'Hello! - Worker #' + cluster.worker.id + ' @ ' + new Date().getTime() );
+            var cpus = os.cpus().length
+                ,load = os.loadavg()[0]
+                ,curLoad = Math.floor( ( load / cpus ) * 100 );
+
+            socket.send( 'Worker #' + cluster.worker.id + ' CPU: ' + curLoad + ' %' );
         }, 5000 );
     });
 
