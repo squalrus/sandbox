@@ -83,7 +83,7 @@ if( cluster.isMaster ){
          redisPub    : pub
         ,redisSub    : sub
         ,redisClient : client
-    }));
+    });
     sio.set( 'store', store );
     store.on( 'error', console.error );
 
