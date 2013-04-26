@@ -4,13 +4,11 @@ var  express    = require( 'express' )
     ,io         = require( 'socket.io' )
     ,cluster    = require( 'cluster' )
     ,os         = require( 'os' )
-    ,MongoStore = require( 'socket.io-mongo' )
-    // ,MongoStore = require( 'mong.socket.io' )
-    // ,redis      = require( 'redis' )
-    // ,RedisStore = require( 'socket.io/lib/stores/redis' )
-    // ,pub        = redis.createClient()
-    // ,sub        = redis.createClient()
-    // ,client     = redis.createClient()
+    ,redis      = require( 'redis' )
+    ,RedisStore = require( 'socket.io/lib/stores/redis' )
+    ,pub        = redis.createClient()
+    ,sub        = redis.createClient()
+    ,client     = redis.createClient()
     ;
 
 // Multithreading
@@ -72,32 +70,6 @@ if( cluster.isMaster ){
             worker: cluster.worker.id
         });
 
-        // res.writeHead( 200, {'Content-Type': 'text/plain'} );
-
-        // res.write( 'Request\n' );
-        // res.write( '----------------------------------------\n' );
-        // res.write( 'Request: ' + req + '\n' );
-
-        // res.write( '\n' );
-
-        // res.write( 'CPU Stuff!\n' );
-        // res.write( '----------------------------------------\n' );
-        // res.write( 'Hostname: ' + os.hostname() + '\n' );
-        // res.write( 'OS Name: ' + os.type() + '\n' );
-        // res.write( 'OS Platform: ' + os.platform() + '\n' );
-        // res.write( 'OS Release: ' + os.release() + '\n' );
-        // res.write( 'CPU Arch: ' + os.arch() + '\n' );
-        // res.write( 'CPUS: ' + os.cpus().length + '\n' );
-        // res.write( 'Uptime: ' + os.uptime() + '\n' );
-
-        // res.write( '\n' );
-
-        // res.write( 'Workers \'n Junk\n' );
-        // res.write( '----------------------------------------\n' );
-        // res.write( 'Workers: ' + cluster.length ) + '\n';
-        // res.write( 'Worker: #' + cluster.worker.id );
-
-        // res.end();
     });
 
     // Routing - POST
@@ -106,20 +78,14 @@ if( cluster.isMaster ){
     });
 
     // Socket stuff
-    // io.set( 'transports', 'websocket' );
     // REDIS STORE
-    // sio.set( 'store', new RedisStore({
-    //      redisPub    : pub
-    //     ,redisSub    : sub
-    //     ,redisClient : client
-    // }));
-
-    // MONGO STORE
-    // sio.configure( function(){
-    var store = new MongoStore({ url: 'mongodb://localhost:27017/socketio' });
+    var store = new RedisStore({
+         redisPub    : pub
+        ,redisSub    : sub
+        ,redisClient : client
+    }));
     sio.set( 'store', store );
-    store.on('error', console.error);
-    // });
+    store.on( 'error', console.error );
 
     // Add a connect listener
     sio.sockets.on( 'connection', function( socket ){
