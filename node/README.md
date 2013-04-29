@@ -59,8 +59,9 @@ Server Message: CPU: 8 %
 
 ### Multi - Mongo
 
-broke.
+broke. throwing errors. killing workers. using xhr-polling.
 
+( socket.io-mongo )
 Server Message: CPU: 10 %
 Server Message: CPU: 9 %
 Server Message: CPU: 8 %
@@ -75,3 +76,20 @@ Server Message: CPU: 19 %
 Server Message: CPU: 17 %
 Server Message: CPU: 18 %
 Server Message: CPU: 18 %
+
+( mong.socket.io )
+Server Message: CPU: 18 %
+Server Message: CPU: 17 %
+Server Message: CPU: 15 %
+Server Message: CPU: 14 %
+Server Message: CPU: 13 %
+Server Message: CPU: 12 %
+Server Message: CPU: 11 %
+Server Message: CPU: 10 %
+Server Message: CPU: 9 %
+Server Message: CPU: 8 %
+Server Message: CPU: 10 %
+Server Message: CPU: 9 %
+Server Message: CPU: 12 %
+Server Message: CPU: 13 %
+Server Message: CPU: 12 %

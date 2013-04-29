@@ -76,9 +76,11 @@ if( cluster.isMaster ){
 
     // Socket stuff
     // MONGO STORE
-    var store = new MongoStore({ url: 'mongodb://localhost:27017/socketio' });
-    sio.set( 'store', store );
-    store.on( 'error', console.error );
+    sio.configure(function() {
+        var store = new MongoStore({ url: 'mongodb://localhost:27017/socketio' });
+        store.on( 'error', console.error );
+        sio.set( 'store', store );
+    });
 
     // Add a connect listener
     sio.sockets.on( 'connection', function( socket ){
