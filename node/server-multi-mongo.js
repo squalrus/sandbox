@@ -4,8 +4,8 @@ var  express    = require( 'express' )
     ,io         = require( 'socket.io' )
     ,cluster    = require( 'cluster' )
     ,os         = require( 'os' )
-    ,MongoStore = require( 'socket.io-mongo' )
-    // ,MongoStore = require( 'mong.socket.io' )
+    // ,MongoStore = require( 'socket.io-mongo' )
+    ,MongoStore = require( 'mong.socket.io' )
     ;
 
 // Multithreading
