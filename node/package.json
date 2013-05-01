@@ -10,6 +10,7 @@
         ,"socket.io": "0.9.x"
         ,"redis": "0.8.x"
         ,"mong.socket.io": "0.9.0"
-        ,"socket.io-mongo": "0.0.8"
+        ,"socket.io-mongo": "git://github.com/inspiredjw/socket.io-mongo.git"
+        ,"socket.io-mongodb": "git://github.com/squalrus/socket.io-mongodb.git"
     }
 }

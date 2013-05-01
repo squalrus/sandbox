@@ -4,8 +4,9 @@ var  express    = require( 'express' )
     ,io         = require( 'socket.io' )
     ,cluster    = require( 'cluster' )
     ,os         = require( 'os' )
-    // ,MongoStore = require( 'socket.io-mongo' )
-    ,MongoStore = require( 'mong.socket.io' )
+    ,MongoStore = require( 'socket.io-mongo' )
+    // ,MongoStore = require( 'mong.socket.io' )
+    // ,MongoStore = require( 'socket.io-mongodb' )
     ;
 
 // Multithreading
@@ -18,9 +19,9 @@ if( cluster.isMaster ){
 
     var workerIds = Object.keys( cluster.workers );
 
-    workerIds.forEach( function( id ){
-        cluster.workers[ id ].on( 'message', function( message ){
-            console.log( 'Master recieved message from Worker #' + id );
+    workerIds.forEach( function( element, index, array ){
+        cluster.workers[ element ].on( 'message', function( message ){
+            console.log( 'Master recieved message from Worker #' + element );
             var muleWorkerId = workerIds[ Math.floor( Math.random() * workerIds.length ) ];
             var muleWorker = cluster.workers[ muleWorkerId ];
             console.log( 'Sending to Worker #' + muleWorkerId );
@@ -89,7 +90,7 @@ if( cluster.isMaster ){
 
         // Success, listen to messages to be recieved
         socket.on( 'message', function( message ){
-            console.log( 'Worker recieved message from client: ', message );
+            console.log( 'Worker #' + cluster.worker.id + ' recieved message from client: ', message );
             process.send( message );
         });
 

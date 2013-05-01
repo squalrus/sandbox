@@ -6,38 +6,45 @@
 <body>
     <hgroup>
         <h1>Welcome.</h1>
-        <h3>Your Worker: <%= worker %></h3>
+        <h3 id="status">Your Worker: <%= worker %></h3>
         <button id="sendMessage">Send Message</button>
     </hgroup>
 
     <script src="js/socket.io.js"></script>
     <script>
         // Create SocketIO instance, and connect
-        var socket = io.connect( 'http://localhost', { port: 1337 });
+        var socket = io.connect( 'http://localhost', { port: 1337 })
+            ,status = document.getElementById( 'status' )
+            ,msg;
 
         // Add a connect listener
         socket.on( 'connect', function(){
-            console.log( 'Client connected to the server!' );
+            messageWrite( 'Client connected to the server!' );
         });
 
         // Add a message listener
         socket.on( 'message', function( data ){
-            console.log( 'Server Message:', data );
+            messageWrite( 'Server Message: ' + data );
         });
 
         // Add a disconnect listener
         socket.on( 'disconnect', function(){
-            console.log( 'The client has disconnected!' );
+            messageWrite( 'The client has disconnected!' );
         });
 
         // Add custom listener
         socket.on( 'welcome', function( data ){
-            console.log( 'Custom thing:', data.msg );
+            messageWrite( 'Custom thing: ' + data.msg );
         });
 
         document.getElementById( 'sendMessage' ).addEventListener( 'click', function(){
             sendMessageToServer( 'hello!' );
         });
+
+        function messageWrite( message ){
+            console.log( message );
+             document.getElementById( 'status' ).innerText = message;
+        }
 
         // Send message to the server via sockets
         function sendMessageToServer( message ){
