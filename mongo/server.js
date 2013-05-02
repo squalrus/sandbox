@@ -35,24 +35,25 @@ db.open( function( error, client ){
             if( !error )
                 console.log( 'collection created!' );
 
-            setInterval( function( ){
-                var doc = { 'message': 'Hi there!' };
-                collection.insert( doc );
+            var cursor = collection.find({}, { tailable: true });
 
-                var lastValue = mongodb.MinKey();
-                console.log( 'MinKey: ' + JSON.stringify( lastValue ) );
-            }, 5000 );
+            function tail( cursor ){
 
-            var lastValue = mongodb.MinKey();
-            console.log( 'MinKey: ' + JSON.stringify( lastValue ) );
+                cursor.nextObject( function( error, item ){
+                    if( error )
+                        console.log( 'error' + error );
+                    if( item ){
+                        console.log( 'item: ' + JSON.stringify( item ) );
+                    }
 
-
-            function tail( ){
-                var lastValue = mongodb.MinKey();
-
-                console.log( 'MinKey: ' + lastValue );
+                    tail( cursor );
+                });
             }
-        });
+
+            tail( cursor);
+
+        }
+    );
 });
 
 // Middleware
@@ -69,5 +70,17 @@ app.get( '/', function( req, res ){
 // AJAX route to find stuff?
 
 // Then one to send? ...to test?
+app.post( '/', function( req, res ){
+    db.open( function( error, client ){
+        var doc = { 'message': 'Hi there!', 'time': +new Date() };
+        db.collection( 'stuff' ).insert( doc, { w: 1 }, function( error, result ){
+            console.log( 'Added record -- ' + JSON.stringify( result ) );
+        });
+    });
+
+    // db.close();
+
+    res.send({ success: 1 });
+});
 
 console.log( 'Server running at http://127.0.0.1:1337/' );
