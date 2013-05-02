@@ -9,13 +9,17 @@
         <h3>Get ready for some MongoDB tailable cursor and capped collection action. It's about to get real.</h3>
     </hgroup>
 
+    <input type="text" id="textData" />
     <button id="sendData">Click me!</button>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script>
         $( '#sendData' ).on( 'click', function( event ){
+            var textData = $( '#textData' ).val();
+
             $.ajax( '/', {
                 type: 'POST'
+                ,data: { message: textData }
                 ,success: function( data, status, xhr ){
                     console.log( 'SENT! -- ' + status );
                 }
