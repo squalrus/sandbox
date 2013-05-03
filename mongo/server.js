@@ -39,26 +39,34 @@ if( cluster.isMaster ){
         db.createCollection( 'stuff'
             ,{
                 capped: true
-                ,size: 1000
-                ,max: 10
+                ,size: 100000
+                ,max: 10000
             }
             ,function( error, collection ){
                 if( !error )
                     console.log( 'collection created!' );
 
-                var cursor = collection.find({}, { tailable: true });
+                var cursor = collection.find({}, { tailable: true, awaitdata: true, timeout: false });
 
                 function tail( cursor ){
 
-                    cursor.nextObject( function( error, item ){
-                        if( error )
-                            console.log( 'error' + error );
-                        if( item ){
-                            console.log( 'item: ' + JSON.stringify( item ) );
-                        }
+                    try {
+                        cursor.nextObject( function( error, item ){
+                            if( error )
+                                console.log( 'error! ' + error );
+                            if( item ){
+                                console.log( 'item!! ' + JSON.stringify( item ) );
+                            }
+
+                            tail( cursor );
+                        });
+                    } catch( e ) {
+                        console.log( 'broke! ' + e.message );
+
+                        cursor = collection.find({}, { tailable: true, awaitdata: true, timeout: false });
 
                         tail( cursor );
-                    });
+                    }
                 }
 
                 tail( cursor);
